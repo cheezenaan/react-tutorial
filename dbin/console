@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eux
+
+readonly APP_CONTAINER="main"
+readonly COMMAND="/bin/sh"
+
+docker-compose run --rm $APP_CONTAINER $COMMAND $@
