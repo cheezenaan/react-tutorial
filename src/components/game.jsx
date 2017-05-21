@@ -1,7 +1,7 @@
 import React from 'react';
 import Board from './board';
 
-import { ROWS, COLUMNS } from '../config';
+import { COLUMNS } from '../config';
 import { calculateWinner } from '../common';
 
 export default class Game extends React.Component {
@@ -9,7 +9,7 @@ export default class Game extends React.Component {
     super();
     this.state = {
       history: [{
-        squares: Array(9).fill(null),
+        squares: Array(9).fill({ value: null, highlighted: false }),
         location: null,
       }],
       stepNumber: 0,
@@ -20,13 +20,17 @@ export default class Game extends React.Component {
 
   handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
+    const current = history[this.state.stepNumber];
     const squares = current.squares.slice();
-
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(squares) || squares[i].value) {
       return;
     }
-    squares[i] = this.state.xIsNext ? 'X' : 'O';
+
+    squares[i] = { value: this.state.xIsNext ? 'X' : 'O', highlighted: false };
+    const winLine = calculateWinner(squares);
+    if (winLine) {
+      winLine.every(j => (squares[j] = { value: squares[j].value, highlighted: true }));
+    }
     const x = (i % COLUMNS) + 1;
     const y = Math.floor(i / COLUMNS) + 1;
     this.setState({
@@ -45,7 +49,7 @@ export default class Game extends React.Component {
       xIsNext: !(step % 2),
     });
   }
-  
+
   toggleOrder() {
     this.setState({
       ascending: !this.state.ascending,
@@ -55,10 +59,10 @@ export default class Game extends React.Component {
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winLine = calculateWinner(current.squares);
     const descending = !this.state.ascending;
 
-    let moves = history.map((step, move) => {
+    const moves = history.map((step, move) => {
       let desc = move ?
         `Move (${step.location.x}, ${step.location.y})` :
         'Game start';
@@ -76,8 +80,8 @@ export default class Game extends React.Component {
     }
 
     let status;
-    if (winner) {
-      status = `Winner: ${winner}`;
+    if (winLine) {
+      status = `Winner: ${current.squares[winLine[0]].value}`;
     } else {
       status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
     }
