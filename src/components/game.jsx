@@ -1,6 +1,7 @@
 import React from 'react';
 import Board from './board';
 
+import { ROWS, COLUMNS } from '../config';
 import { calculateWinner } from '../common';
 
 export default class Game extends React.Component {
@@ -9,6 +10,7 @@ export default class Game extends React.Component {
     this.state = {
       history: [{
         squares: Array(9).fill(null),
+        location: null,
       }],
       stepNumber: 0,
       xIsNext: true,
@@ -24,9 +26,12 @@ export default class Game extends React.Component {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
+    const x = (i % COLUMNS) + 1;
+    const y = Math.floor(i / COLUMNS) + 1;
     this.setState({
       history: history.concat([{
         squares,
+        location: { x, y },
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -47,7 +52,7 @@ export default class Game extends React.Component {
 
     const moves = history.map((step, move) => {
       const desc = move ?
-        `Move #${move}` :
+        `Move (${step.location.x}, ${step.location.y})` :
         'Game start';
       return (
         <li key={move}>
