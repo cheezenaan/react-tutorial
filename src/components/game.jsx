@@ -14,6 +14,7 @@ export default class Game extends React.Component {
       }],
       stepNumber: 0,
       xIsNext: true,
+      ascending: true,
     };
   }
 
@@ -44,13 +45,20 @@ export default class Game extends React.Component {
       xIsNext: !(step % 2),
     });
   }
+  
+  toggleOrder() {
+    this.setState({
+      ascending: !this.state.ascending,
+    });
+  }
 
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const descending = !this.state.ascending;
 
-    const moves = history.map((step, move) => {
+    let moves = history.map((step, move) => {
       let desc = move ?
         `Move (${step.location.x}, ${step.location.y})` :
         'Game start';
@@ -63,6 +71,9 @@ export default class Game extends React.Component {
         </li>
       );
     });
+    if (descending) {
+      moves.sort((a, b) => b.key - a.key);
+    }
 
     let status;
     if (winner) {
@@ -81,6 +92,7 @@ export default class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
+          <div><button onClick={() => this.toggleOrder()}>Toggle order</button></div>
           <ol>{moves}</ol>
         </div>
       </div>
